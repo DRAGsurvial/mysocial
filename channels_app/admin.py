@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Channel, Article, ArticleLike, ArticleView, Comment
+from .models import Channel, Article, ArticleLike, ArticleView, Comment, ChannelSubscription, Notification
 
 
 @admin.register(Channel)
@@ -31,3 +31,15 @@ class ArticleViewAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('id', 'article', 'author', 'created_at')
     search_fields = ('article__title', 'author__username', 'text')
+    
+@admin.register(ChannelSubscription)
+class ChannelSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'channel', 'user', 'created_at')
+    search_fields = ('channel__title', 'user__username')
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'recipient', 'sender', 'notification_type', 'is_read', 'created_at')
+    search_fields = ('recipient__username', 'sender__username')
+    list_filter = ('notification_type', 'is_read')

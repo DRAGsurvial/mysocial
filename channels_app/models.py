@@ -113,3 +113,37 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.author.username} on {self.article.title}'
+        
+class ChannelSubscription(models.Model):
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='subscriptions')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='channel_subscriptions')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('channel', 'user')
+
+    def __str__(self):
+        return f'{self.user.username} subscribed to {self.channel.title}'
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('like', 'Like'),
+        ('comment', 'Comment'),
+        ('subscription', 'Subscription'),
+    )
+
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications')
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.notification_type} for {self.recipient.username}'

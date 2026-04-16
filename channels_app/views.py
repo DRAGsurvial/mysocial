@@ -2,9 +2,20 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.db.models import Count
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
 
 from .forms import ArticleForm, ChannelForm, CommentForm
-from .models import Article, Channel, ArticleLike, ArticleView, Comment
+from .models import (
+    Article,
+    Channel,
+    ArticleLike,
+    ArticleView,
+    Comment,
+    ChannelSubscription,
+    Notification,
+)
 
 
 def home_view(request):
@@ -30,7 +41,18 @@ def create_channel_view(request):
 def channel_detail_view(request, slug):
     channel = get_object_or_404(Channel, slug=slug)
     articles = channel.articles.filter(status='published')
-    return render(request, 'channels/channel_detail.html', {'channel': channel, 'articles': articles})
+
+    is_subscribed = False
+    if request.user.is_authenticated:
+        is_subscribed = ChannelSubscription.objects.filter(channel=channel, user=request.user).exists()
+
+    context = {
+        'channel': channel,
+        'articles': articles,
+        'is_subscribed': is_subscribed,
+        'subscribers_count': channel.subscriptions.count(),
+    }
+    return render(request, 'channels/channel_detail.html', context)
 
 
 @login_required
@@ -117,10 +139,27 @@ def toggle_like_view(request, channel_slug, article_slug):
     )
 
     like, created = ArticleLike.objects.get_or_create(article=article, user=request.user)
-    if not created:
-        like.delete()
 
-    return redirect('article_detail', channel_slug=channel_slug, article_slug=article_slug)
+    if created:
+        liked = True
+
+        if article.author != request.user:
+            Notification.objects.create(
+                recipient=article.author,
+                sender=request.user,
+                article=article,
+                channel=article.channel,
+                notification_type='like'
+            )
+    else:
+        like.delete()
+        liked = False
+
+    return JsonResponse({
+        'success': True,
+        'liked': liked,
+        'likes_count': article.likes.count(),
+    })
 
 
 @login_required
@@ -140,4 +179,92 @@ def add_comment_view(request, channel_slug, article_slug):
         comment.author = request.user
         comment.save()
 
-    return redirect('article_detail', channel_slug=channel_slug, article_slug=article_slug)
+        if article.author != request.user:
+            Notification.objects.create(
+                recipient=article.author,
+                sender=request.user,
+                article=article,
+                channel=article.channel,
+                comment=comment,
+                notification_type='comment'
+            )
+
+        comment_html = render_to_string(
+            'channels/includes/comment_item.html',
+            {'comment': comment},
+            request=request
+        )
+
+        recent_comment_users = []
+        added = set()
+        for c in article.comments.select_related('author__profile').order_by('-created_at'):
+            if c.author_id not in added:
+                recent_comment_users.append(c.author)
+                added.add(c.author_id)
+            if len(recent_comment_users) == 3:
+                break
+
+        avatars_html = render_to_string(
+            'channels/includes/comment_avatars.html',
+            {'recent_comment_users': recent_comment_users},
+            request=request
+        )
+
+        return JsonResponse({
+            'success': True,
+            'comments_count': article.comments.count(),
+            'comment_html': comment_html,
+            'avatars_html': avatars_html,
+        })
+
+    return JsonResponse({
+        'success': False,
+        'errors': form.errors,
+    }, status=400)
+    
+@login_required
+@require_POST
+def toggle_subscription_view(request, slug):
+    channel = get_object_or_404(Channel, slug=slug)
+
+    subscription, created = ChannelSubscription.objects.get_or_create(
+        channel=channel,
+        user=request.user
+    )
+
+    if created:
+        subscribed = True
+
+        if channel.owner != request.user:
+            Notification.objects.create(
+                recipient=channel.owner,
+                sender=request.user,
+                channel=channel,
+                notification_type='subscription'
+            )
+    else:
+        subscription.delete()
+        subscribed = False
+
+    return JsonResponse({
+        'success': True,
+        'subscribed': subscribed,
+        'subscribers_count': channel.subscriptions.count(),
+    })
+
+
+@login_required
+def notifications_view(request):
+    notifications = request.user.notifications.select_related(
+        'sender',
+        'sender__profile',
+        'channel',
+        'article',
+        'comment'
+    )
+
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+
+    return render(request, 'channels/notifications.html', {
+        'notifications': notifications
+    })

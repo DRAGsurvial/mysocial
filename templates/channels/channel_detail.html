@@ -3,6 +3,19 @@
 <h1>{{ channel.title }}</h1>
 <p>{{ channel.description }}</p>
 
+<div style="display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+    <span>Подписчиков: <strong id="subscribers-count">{{ subscribers_count }}</strong></span>
+
+    {% if user.is_authenticated and request.user != channel.owner %}
+        <button
+            id="subscribe-button"
+            data-url="{% url 'toggle_subscription' slug=channel.slug %}"
+            style="padding:10px 14px; border:none; border-radius:10px; cursor:pointer; background:{% if is_subscribed %}#111{% else %}#f2f2f2{% endif %}; color:{% if is_subscribed %}white{% else %}black{% endif %};">
+            <span id="subscribe-text">{% if is_subscribed %}Вы подписаны{% else %}Подписаться{% endif %}</span>
+        </button>
+    {% endif %}
+</div>
+
 {% if request.user == channel.owner %}
     <p>
         <a href="{% url 'create_article' channel_slug=channel.slug %}">Написать статью</a>
@@ -34,4 +47,54 @@
 {% empty %}
     <p>В этом канале пока нет опубликованных статей.</p>
 {% endfor %}
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const subscribeButton = document.getElementById('subscribe-button');
+if (subscribeButton) {
+    subscribeButton.addEventListener('click', async function () {
+        const url = this.dataset.url;
+        const csrftoken = getCookie('csrftoken');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('subscribers-count').textContent = data.subscribers_count;
+
+            const text = document.getElementById('subscribe-text');
+            if (data.subscribed) {
+                text.textContent = 'Вы подписаны';
+                subscribeButton.style.background = '#111';
+                subscribeButton.style.color = 'white';
+            } else {
+                text.textContent = 'Подписаться';
+                subscribeButton.style.background = '#f2f2f2';
+                subscribeButton.style.color = 'black';
+            }
+        }
+    });
+}
+</script>
 {% endblock %}
