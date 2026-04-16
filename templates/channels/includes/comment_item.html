@@ -1,17 +1,18 @@
-<div class="comment-item" style="padding:12px 0; border-bottom:1px solid #eee;">
-    <div style="display:flex; align-items:center; gap:10px;">
+<div class="comment-item">
+    <div class="comment-head">
         {% if comment.author.profile.avatar %}
-            <img src="{{ comment.author.profile.avatar.url }}" width="36" height="36" style="border-radius:50%; object-fit:cover;">
+            <img src="{{ comment.author.profile.avatar.url }}" class="comment-avatar" alt="">
         {% else %}
-            <div style="width:36px;height:36px;border-radius:50%;background:#ddd;"></div>
+            <div class="comment-avatar"></div>
         {% endif %}
+
         <div>
-            <strong>{{ comment.author.profile.nickname }}</strong><br>
-            <small style="color:#777;">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+            <div class="comment-author">{{ comment.author.profile.nickname }}</div>
+            <div class="comment-time">{{ comment.created_at|date:"d.m.Y H:i" }}</div>
         </div>
     </div>
 
-    <div style="margin-top:10px;">
+    <div class="comment-text">
         {{ comment.text|linebreaks }}
     </div>
 </div>

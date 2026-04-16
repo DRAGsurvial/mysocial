@@ -1,71 +1,84 @@
 {% extends 'base.html' %}
 {% block content %}
-<article class="card">
-    <h1>{{ article.title }}</h1>
-    <p>Автор: {{ article.author.username }}</p>
-    <p>
-        Канал:
-        <a href="{% url 'channel_detail' slug=article.channel.slug %}">
-            {{ article.channel.title }}
-        </a>
-    </p>
+<article class="page-block">
+    <div class="article-card">
+        <div class="article-card-inner">
+            <a href="{% url 'channel_detail' slug=article.channel.slug %}" class="article-channel-link">
+                {{ article.channel.title }}
+            </a>
 
-    <div style="margin: 24px 0;">
-        {{ article.content|safe }}
-    </div>
+            <h1 class="article-title">{{ article.title }}</h1>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px; font-size:14px; color:#666; flex-wrap:wrap; gap:12px;">
-        <div style="display:flex; align-items:center; gap:16px;">
-            {% if user.is_authenticated %}
-                <button
-                    id="like-button"
-                    data-url="{% url 'toggle_like' channel_slug=article.channel.slug article_slug=article.slug %}"
-                    style="border:none; background:none; cursor:pointer; font-size:14px; color:{% if user_liked %}red{% else %}#666{% endif %};">
-                    ♥ <span id="likes-count">{{ article.likes_count }}</span>
-                </button>
-            {% else %}
-                <a href="{% url 'login' %}" style="text-decoration:none; color:#666;">
-                    ♥ <span id="likes-count">{{ article.likes_count }}</span>
-                </a>
+            <div class="article-meta-top" style="margin-bottom: 24px;">
+                Автор: {{ article.author.username }} · {{ article.created_at|date:"d.m.Y H:i" }}
+            </div>
+
+            {% if article.cover %}
+                <div class="article-cover" style="margin-bottom: 28px;">
+                    <img src="{{ article.cover.url }}" alt="{{ article.title }}">
+                </div>
             {% endif %}
 
-            <a href="#comments"
-               style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
-                <div id="comment-avatars">
-                    {% include 'channels/includes/comment_avatars.html' with recent_comment_users=recent_comment_users %}
-                </div>
-                <span>Комментарии <span id="comments-count">{{ article.comments_count }}</span></span>
-            </a>
-        </div>
+            <div class="article-content">
+                {{ article.content|safe }}
+            </div>
 
-        <div>
-            <span>👁 {{ article.views_count }}</span>
+            <div class="article-actions">
+                <div class="article-actions-left">
+                    {% if user.is_authenticated %}
+                        <button
+                            id="like-button"
+                            class="pill-button {% if user_liked %}liked{% endif %}"
+                            data-url="{% url 'toggle_like' channel_slug=article.channel.slug article_slug=article.slug %}">
+                            ♥ <span id="likes-count">{{ article.likes_count }}</span>
+                        </button>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="pill-link">
+                            ♥ <span id="likes-count">{{ article.likes_count }}</span>
+                        </a>
+                    {% endif %}
+
+                    <a href="#comments" class="pill-link comments-preview">
+                        <div id="comment-avatars" class="comment-avatars">
+                            {% include 'channels/includes/comment_avatars.html' with recent_comment_users=recent_comment_users %}
+                        </div>
+                        <span>Комментарии <span id="comments-count">{{ article.comments_count }}</span></span>
+                    </a>
+                </div>
+
+                <div class="article-views">
+                    👁 {{ article.views_count }}
+                </div>
+            </div>
         </div>
     </div>
 </article>
 
-<section id="comments" class="card" style="margin-top:24px;">
-    <h2>Комментарии</h2>
+<section id="comments" class="page-block">
+    <div class="card card-inner">
+        <div class="section-header">
+            <h2 class="section-title">Комментарии</h2>
+        </div>
 
-    {% if user.is_authenticated %}
-        <form id="comment-form"
-              data-url="{% url 'add_comment' channel_slug=article.channel.slug article_slug=article.slug %}">
-            {% csrf_token %}
-            {{ comment_form.as_p }}
-            <button type="submit">Отправить</button>
-        </form>
-    {% else %}
-        <p><a href="{% url 'login' %}">Войди</a>, чтобы оставить комментарий.</p>
-    {% endif %}
+        {% if user.is_authenticated %}
+            <form id="comment-form"
+                  class="comment-form"
+                  data-url="{% url 'add_comment' channel_slug=article.channel.slug article_slug=article.slug %}">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+                <button type="submit" class="button">Отправить</button>
+            </form>
+        {% else %}
+            <p class="muted"><a href="{% url 'login' %}">Войди</a>, чтобы оставить комментарий.</p>
+        {% endif %}
 
-    <hr>
-
-    <div id="comments-list">
-        {% for comment in comments %}
-            {% include 'channels/includes/comment_item.html' with comment=comment %}
-        {% empty %}
-            <p id="no-comments-text">Комментариев пока нет.</p>
-        {% endfor %}
+        <div id="comments-list" class="comments-list">
+            {% for comment in comments %}
+                {% include 'channels/includes/comment_item.html' with comment=comment %}
+            {% empty %}
+                <p id="no-comments-text" class="muted">Комментариев пока нет.</p>
+            {% endfor %}
+        </div>
     </div>
 </section>
 
@@ -104,7 +117,7 @@ if (likeButton) {
 
         if (data.success) {
             document.getElementById('likes-count').textContent = data.likes_count;
-            likeButton.style.color = data.liked ? 'red' : '#666';
+            likeButton.classList.toggle('liked', data.liked);
         }
     });
 }

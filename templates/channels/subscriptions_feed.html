@@ -1,26 +1,44 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Лента подписок</h1>
+<section class="page-block">
+    <div class="section-header">
+        <h1 class="section-title">Лента подписок</h1>
+    </div>
 
-{% for article in articles %}
-    <article class="card" style="padding:24px; margin-bottom:18px;">
-        <a href="{% url 'channel_detail' slug=article.channel.slug %}" style="text-decoration:none; color:#666;">
-            {{ article.channel.title }}
-        </a>
+    {% if articles %}
+        <div class="articles-list">
+            {% for article in articles %}
+                <article class="article-card">
+                    <div class="article-card-inner">
+                        <a href="{% url 'channel_detail' slug=article.channel.slug %}" class="article-channel-link">
+                            {{ article.channel.title }}
+                        </a>
 
-        <h2>
-            <a href="{% url 'article_detail' channel_slug=article.channel.slug article_slug=article.slug %}">
-                {{ article.title }}
-            </a>
-        </h2>
+                        <h2 class="article-title-sm">
+                            <a href="{% url 'article_detail' channel_slug=article.channel.slug article_slug=article.slug %}">
+                                {{ article.title }}
+                            </a>
+                        </h2>
 
-        <div style="display:flex; gap:14px; color:#777; font-size:14px;">
-            <span>👁 {{ article.views_count }}</span>
-            <span>❤️ {{ article.likes_count }}</span>
-            <span>💬 {{ article.comments_count }}</span>
+                        <div class="article-meta-top">
+                            Автор: {{ article.author.username }} · {{ article.created_at|date:"d.m.Y H:i" }}
+                        </div>
+
+                        <div class="article-actions">
+                            <div class="article-actions-left">
+                                <span class="pill-link">❤️ {{ article.likes_count }}</span>
+                                <span class="pill-link">💬 {{ article.comments_count }}</span>
+                            </div>
+                            <div class="article-views">👁 {{ article.views_count }}</div>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
         </div>
-    </article>
-{% empty %}
-    <p>Ты пока ни на кого не подписан или в подписках ещё нет статей.</p>
-{% endfor %}
+    {% else %}
+        <div class="card empty-card">
+            Ты пока ни на кого не подписан или в подписках ещё нет статей.
+        </div>
+    {% endif %}
+</section>
 {% endblock %}

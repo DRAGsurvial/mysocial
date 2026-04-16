@@ -1,12 +1,7 @@
-<div style="display:flex; margin-right:6px;">
-    {% for comment_user in recent_comment_users %}
-        {% if comment_user.profile.avatar %}
-            <img src="{{ comment_user.profile.avatar.url }}"
-                 width="24"
-                 height="24"
-                 style="border-radius:50%; object-fit:cover; margin-left:-6px; border:2px solid white;">
-        {% else %}
-            <div style="width:24px;height:24px;border-radius:50%;background:#ddd;margin-left:-6px;border:2px solid white;"></div>
-        {% endif %}
-    {% endfor %}
-</div>
+{% for comment_user in recent_comment_users %}
+    {% if comment_user.profile.avatar %}
+        <img src="{{ comment_user.profile.avatar.url }}" class="comment-avatar-sm" alt="">
+    {% else %}
+        <div class="comment-avatar-placeholder"></div>
+    {% endif %}
+{% endfor %}

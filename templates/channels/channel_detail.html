@@ -1,52 +1,83 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>{{ channel.title }}</h1>
-<p>{{ channel.description }}</p>
+<section class="page-block">
+    <div class="card card-inner">
+        <div class="channel-page-head">
+            <div class="channel-main">
+                {% if channel.avatar %}
+                    <img src="{{ channel.avatar.url }}" alt="{{ channel.title }}" class="channel-page-avatar">
+                {% else %}
+                    <div class="channel-page-avatar"></div>
+                {% endif %}
 
-<div style="display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
-    <span>Подписчиков: <strong id="subscribers-count">{{ subscribers_count }}</strong></span>
+                <div>
+                    <h1 class="channel-page-title">{{ channel.title }}</h1>
+                    <div class="channel-page-subtitle">@{{ channel.slug }}</div>
+                    <div class="channel-page-description">
+                        {{ channel.description|default:"Описание канала пока не добавлено." }}
+                    </div>
 
-    {% if user.is_authenticated and request.user != channel.owner %}
-        <button
-            id="subscribe-button"
-            data-url="{% url 'toggle_subscription' slug=channel.slug %}"
-            style="padding:10px 14px; border:none; border-radius:10px; cursor:pointer; background:{% if is_subscribed %}#111{% else %}#f2f2f2{% endif %}; color:{% if is_subscribed %}white{% else %}black{% endif %};">
-            <span id="subscribe-text">{% if is_subscribed %}Вы подписаны{% else %}Подписаться{% endif %}</span>
-        </button>
-    {% endif %}
-</div>
+                    <div class="stats-row">
+                        <span class="stat-pill">Подписчиков: <strong id="subscribers-count">{{ subscribers_count }}</strong></span>
+                        <span class="stat-pill">Статей: {{ articles|length }}</span>
+                    </div>
+                </div>
+            </div>
 
-{% if request.user == channel.owner %}
-    <p>
-        <a href="{% url 'create_article' channel_slug=channel.slug %}">Написать статью</a>
-    </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                {% if user.is_authenticated and request.user != channel.owner %}
+                    <button
+                        id="subscribe-button"
+                        data-url="{% url 'toggle_subscription' slug=channel.slug %}"
+                        class="{% if is_subscribed %}button{% else %}button-light{% endif %}">
+                        <span id="subscribe-text">{% if is_subscribed %}Вы подписаны{% else %}Подписаться{% endif %}</span>
+                    </button>
+                {% endif %}
 
-    <form method="post" action="{% url 'delete_channel' slug=channel.slug %}" onsubmit="return confirm('Удалить канал? Все статьи тоже удалятся.');">
-        {% csrf_token %}
-        <button type="submit" style="background:#ff4d4f;color:white;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;">
-            Удалить канал
-        </button>
-    </form>
-{% endif %}
+                {% if request.user == channel.owner %}
+                    <a href="{% url 'create_article' channel_slug=channel.slug %}" class="button">Написать статью</a>
 
-<hr>
-
-{% for article in articles %}
-    <div class="card">
-        <h2>
-            <a href="{% url 'article_detail' channel_slug=channel.slug article_slug=article.slug %}">
-                {{ article.title }}
-            </a>
-        </h2>
-        <div style="display:flex; gap:16px; color:#777; font-size:14px;">
-            <span>👁 {{ article.views_count }}</span>
-            <span>❤️ {{ article.likes_count }}</span>
-            <span>💬 {{ article.comments_count }}</span>
+                    <form method="post" action="{% url 'delete_channel' slug=channel.slug %}" onsubmit="return confirm('Удалить канал? Все статьи тоже удалятся.');">
+                        {% csrf_token %}
+                        <button type="submit" class="button-danger">Удалить канал</button>
+                    </form>
+                {% endif %}
+            </div>
         </div>
     </div>
-{% empty %}
-    <p>В этом канале пока нет опубликованных статей.</p>
-{% endfor %}
+</section>
+
+<section class="page-block">
+    <div class="section-header">
+        <h2 class="section-title">Статьи канала</h2>
+    </div>
+
+    {% for article in articles %}
+        <article class="article-card" style="margin-bottom:18px;">
+            <div class="article-card-inner">
+                <h2 class="article-title-sm">
+                    <a href="{% url 'article_detail' channel_slug=channel.slug article_slug=article.slug %}">
+                        {{ article.title }}
+                    </a>
+                </h2>
+
+                <div class="article-meta-top">
+                    {{ article.created_at|date:"d.m.Y H:i" }}
+                </div>
+
+                <div class="article-actions">
+                    <div class="article-actions-left">
+                        <span class="pill-link">❤️ {{ article.likes_count }}</span>
+                        <span class="pill-link">💬 {{ article.comments_count }}</span>
+                    </div>
+                    <div class="article-views">👁 {{ article.views_count }}</div>
+                </div>
+            </div>
+        </article>
+    {% empty %}
+        <div class="card empty-card">В этом канале пока нет опубликованных статей.</div>
+    {% endfor %}
+</section>
 
 <script>
 function getCookie(name) {
@@ -86,12 +117,10 @@ if (subscribeButton) {
             const text = document.getElementById('subscribe-text');
             if (data.subscribed) {
                 text.textContent = 'Вы подписаны';
-                subscribeButton.style.background = '#111';
-                subscribeButton.style.color = 'white';
+                subscribeButton.className = 'button';
             } else {
                 text.textContent = 'Подписаться';
-                subscribeButton.style.background = '#f2f2f2';
-                subscribeButton.style.color = 'black';
+                subscribeButton.className = 'button-light';
             }
         }
     });

@@ -1,40 +1,48 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Уведомления</h1>
-
-{% for notification in notifications %}
-    <div class="card" style="margin-bottom:16px;">
-        <p>
-            <strong>{{ notification.sender.username }}</strong>
-
-            {% if notification.notification_type == 'like' %}
-                лайкнул(а) вашу статью
-            {% elif notification.notification_type == 'comment' %}
-                прокомментировал(а) вашу статью
-            {% elif notification.notification_type == 'subscription' %}
-                подписался(ась) на ваш канал
-            {% endif %}
-        </p>
-
-        {% if notification.article %}
-            <p>
-                <a href="{% url 'article_detail' channel_slug=notification.article.channel.slug article_slug=notification.article.slug %}">
-                    {{ notification.article.title }}
-                </a>
-            </p>
-        {% endif %}
-
-        {% if notification.channel and not notification.article %}
-            <p>
-                <a href="{% url 'channel_detail' slug=notification.channel.slug %}">
-                    {{ notification.channel.title }}
-                </a>
-            </p>
-        {% endif %}
-
-        <small style="color:#777;">{{ notification.created_at|date:"d.m.Y H:i" }}</small>
+<section class="page-block">
+    <div class="section-header">
+        <h1 class="section-title">Уведомления</h1>
     </div>
-{% empty %}
-    <p>Уведомлений пока нет.</p>
-{% endfor %}
+
+    {% if notifications %}
+        <div class="notification-list">
+            {% for notification in notifications %}
+                <div class="notification-item">
+                    <p class="notification-text">
+                        <strong>{{ notification.sender.username }}</strong>
+
+                        {% if notification.notification_type == 'like' %}
+                            лайкнул(а) вашу статью
+                        {% elif notification.notification_type == 'comment' %}
+                            прокомментировал(а) вашу статью
+                        {% elif notification.notification_type == 'subscription' %}
+                            подписался(ась) на ваш канал
+                        {% endif %}
+                    </p>
+
+                    {% if notification.article %}
+                        <p class="notification-text">
+                            <a href="{% url 'article_detail' channel_slug=notification.article.channel.slug article_slug=notification.article.slug %}">
+                                {{ notification.article.title }}
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    {% if notification.channel and not notification.article %}
+                        <p class="notification-text">
+                            <a href="{% url 'channel_detail' slug=notification.channel.slug %}">
+                                {{ notification.channel.title }}
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    <div class="notification-time">{{ notification.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card empty-card">Уведомлений пока нет.</div>
+    {% endif %}
+</section>
 {% endblock %}
