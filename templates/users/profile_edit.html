@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Редактировать профиль — MySocial{% endblock %}
+{% block content %}
+<section class="page">
+    <div class="card form-card">
+        <div class="eyebrow">Настройки профиля</div>
+        <h1 class="section-title">Редактировать профиль</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="primary-btn" type="submit">Сохранить</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

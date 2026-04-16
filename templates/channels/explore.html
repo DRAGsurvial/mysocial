@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Поиск — MySocial{% endblock %}
+{% block content %}
+<section class="page">
+    <div class="card form-card" style="max-width:none;">
+        <div class="eyebrow">Каталог</div>
+        <h1 class="section-title">Поиск каналов и статей</h1>
+        <form method="get">
+            <p><input class="input" type="text" name="q" value="{{ q }}" placeholder="Введите запрос"></p>
+            <button class="primary-btn" type="submit">Найти</button>
+        </form>
+    </div>
+</section>
+
+<section class="page">
+    <h2 class="section-title">Каналы</h2>
+    <div class="grid grid-3">
+        {% for channel in channels %}
+            <a class="card article-card" href="{% url 'channel_detail' slug=channel.slug %}">
+                <h3>{{ channel.title }}</h3>
+                <div class="meta">
+                    <span>@{{ channel.slug }}</span>
+                    <span>{{ channel.owner.username }}</span>
+                </div>
+                <p class="muted">{{ channel.description|truncatechars:120 }}</p>
+            </a>
+        {% empty %}
+            <div class="card article-card empty">Каналы не найдены.</div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="page">
+    <h2 class="section-title">Статьи</h2>
+    <div class="article-list">
+        {% for article in articles %}
+            <article class="card article-card">
+                <div class="meta">
+                    <span>{{ article.channel.title }}</span>
+                    <span>{{ article.author.username }}</span>
+                </div>
+                <h3>
+                    <a href="{% url 'article_detail' channel_slug=article.channel.slug article_slug=article.slug %}">
+                        {{ article.title }}
+                    </a>
+                </h3>
+                <p class="muted">{{ article.content|truncatechars:220 }}</p>
+            </article>
+        {% empty %}
+            <div class="card article-card empty">Статьи не найдены.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

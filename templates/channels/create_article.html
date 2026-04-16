@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Новая статья — MySocial{% endblock %}
+{% block content %}
+<section class="page">
+    <div class="card form-card">
+        <div class="eyebrow">Публикация</div>
+        <h1 class="section-title">Новая статья в канале {{ channel.title }}</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="primary-btn" type="submit">Сохранить статью</button>
+        </form>
+        <p class="muted" style="margin-top:14px;">Чтобы статья появилась на главной, укажи статус Published.</p>
+    </div>
+</section>
+{% endblock %}

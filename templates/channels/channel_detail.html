@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ channel.title }}</h1>
+<p>{{ channel.description }}</p>
+
+{% if request.user == channel.owner %}
+    <p>
+        <a href="{% url 'create_article' channel_slug=channel.slug %}">Написать статью</a>
+    </p>
+
+    <form method="post" action="{% url 'delete_channel' slug=channel.slug %}" onsubmit="return confirm('Удалить канал? Все статьи тоже удалятся.');">
+        {% csrf_token %}
+        <button type="submit" style="background:#ff4d4f;color:white;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;">
+            Удалить канал
+        </button>
+    </form>
+{% endif %}
+
+<hr>
+
+{% for article in articles %}
+    <div class="card">
+        <h2>
+            <a href="{% url 'article_detail' channel_slug=channel.slug article_slug=article.slug %}">
+                {{ article.title }}
+            </a>
+        </h2>
+        <div style="display:flex; gap:16px; color:#777; font-size:14px;">
+            <span>👁 {{ article.views_count }}</span>
+            <span>❤️ {{ article.likes_count }}</span>
+            <span>💬 {{ article.comments_count }}</span>
+        </div>
+    </div>
+{% empty %}
+    <p>В этом канале пока нет опубликованных статей.</p>
+{% endfor %}
+{% endblock %}

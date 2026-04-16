@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile.nickname }} — MySocial{% endblock %}
+{% block content %}
+<section class="page page-grid">
+    <div class="card profile-header">
+        <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px;">
+            {% if profile.avatar %}
+                <img class="avatar" src="{{ profile.avatar.url }}" alt="">
+            {% else %}
+                <div class="avatar"></div>
+            {% endif %}
+            <div>
+                <h1 class="section-title" style="margin:0;">{{ profile.nickname }}</h1>
+                <div class="meta">
+                    <span>@{{ profile.slug }}</span>
+                    <span>{{ profile.user.username }}</span>
+                    <span>Роль: {{ profile.role }}</span>
+                </div>
+            </div>
+        </div>
+        <p class="muted">{{ profile.bio|default:"Пользователь пока ничего не написал о себе." }}</p>
+    </div>
+    <aside class="card profile-header">
+        <div class="eyebrow">Ссылки</div>
+        <ul class="list-clean">
+            <li><span class="badge">Профиль: /u/{{ profile.slug }}/</span></li>
+            {% if request.user == profile.user %}
+                <li><a class="primary-btn" href="{% url 'profile_edit' %}">Редактировать профиль</a></li>
+            {% endif %}
+        </ul>
+    </aside>
+</section>
+
+<section class="page">
+    <h2 class="section-title">Каналы пользователя</h2>
+    <div class="grid grid-3">
+        {% for channel in channels %}
+            <a class="card article-card" href="{% url 'channel_detail' slug=channel.slug %}">
+                <h3>{{ channel.title }}</h3>
+                <div class="meta">
+                    <span>@{{ channel.slug }}</span>
+                    <span>{{ channel.created_at|date:"d.m.Y" }}</span>
+                </div>
+                <p class="muted">{{ channel.description|truncatechars:110 }}</p>
+            </a>
+        {% empty %}
+            <div class="card article-card empty">У этого пользователя пока нет каналов.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

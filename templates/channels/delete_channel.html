@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Удалить канал</h1>
+<p>Ты точно хочешь удалить канал <strong>{{ channel.title }}</strong>?</p>
+<p>Все статьи канала тоже будут удалены.</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" style="background:#ff4d4f;color:white;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;">
+        Да, удалить
+    </button>
+</form>
+{% endblock %}

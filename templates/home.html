@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Главная — MySocial{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="hero-grid">
+        <div class="card hero-card">
+            <div class="eyebrow">Платформа для каналов и статей</div>
+            <h1 class="hero-title">Пиши, публикуй и развивай свою аудиторию.</h1>
+            <p class="hero-subtitle">
+                Чистый минималистичный интерфейс, каналы, статьи, профили и понятная админка с банами,
+                удалением контента и управлением ролями.
+            </p>
+            <div class="actions">
+                {% if user.is_authenticated %}
+                    <a class="primary-btn" href="/channels/create/">Создать канал</a>
+                    <a class="ghost-btn" href="/u/{{ user.profile.slug }}/">Открыть мой профиль</a>
+                {% else %}
+                    <a class="primary-btn" href="{% url 'register' %}">Начать</a>
+                    <a class="ghost-btn" href="{% url 'login' %}">У меня уже есть аккаунт</a>
+                {% endif %}
+            </div>
+        </div>
+        <aside class="card side-note">
+            <div>
+                <div class="eyebrow">Что уже есть</div>
+                <ul class="list-clean muted">
+                    <li>• Регистрация и профили</li>
+                    <li>• Уникальные ссылки профилей и каналов</li>
+                    <li>• Каналы и статьи</li>
+                    <li>• Бан/разбан пользователей</li>
+                    <li>• Выдача moderator/admin</li>
+                    <li>• Удаление каналов и постов</li>
+                </ul>
+            </div>
+            <div class="badge">MVP v2</div>
+        </aside>
+    </div>
+</section>
+
+<section class="page">
+    <h2 class="section-title">Свежие каналы</h2>
+    <div class="grid grid-3">
+        {% for channel in featured_channels %}
+            <a class="card article-card" href="{% url 'channel_detail' slug=channel.slug %}">
+                {% if channel.avatar %}
+                    <img class="channel-cover" src="{{ channel.avatar.url }}" alt="">
+                {% else %}
+                    <div class="channel-cover"></div>
+                {% endif %}
+                <h3>{{ channel.title }}</h3>
+                <div class="meta">
+                    <span>@{{ channel.slug }}</span>
+                    <span>{{ channel.owner.username }}</span>
+                </div>
+                <p class="muted">{{ channel.description|truncatechars:110 }}</p>
+            </a>
+        {% empty %}
+            <div class="card article-card empty">Пока нет каналов. Создай первый.</div>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+        <h2 style="margin:0; font-size:28px;">Новые статьи</h2>
+    </div>
+
+    {% if articles %}
+        <div style="display:flex; flex-direction:column; gap:18px;">
+            {% for article in articles %}
+                <article class="card" style="padding:24px; border-radius:20px; background:#fff; border:1px solid #ececec;">
+                    <div style="margin-bottom:14px;">
+                        <a href="{% url 'channel_detail' slug=article.channel.slug %}"
+                           style="display:inline-block; text-decoration:none; font-size:14px; color:#666; margin-bottom:10px;">
+                            {{ article.channel.title }}
+                        </a>
+
+                        <h3 style="margin:0 0 10px; font-size:30px; line-height:1.2;">
+                            <a href="{% url 'article_detail' channel_slug=article.channel.slug article_slug=article.slug %}"
+                               style="text-decoration:none; color:#111;">
+                                {{ article.title }}
+                            </a>
+                        </h3>
+
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; font-size:14px; color:#777;">
+                            <span>Автор: {{ article.author.username }}</span>
+                            <span>•</span>
+                            <span>{{ article.created_at|date:"H:i" }}</span>
+                        </div>
+                    </div>
+
+                  <div style="display:flex; align-items:center;">
+    
+						<span style="margin-right:16px;">
+							❤️ {{ article.likes_count }}
+						</span>
+
+						<span style="margin-right:auto;">
+							💬 {{ article.comments_count }}
+							
+							{% if article.comments_count == 1 %}
+								Комментарий
+							{% elif article.comments_count > 1 and article.comments_count < 5 %}
+								Комментария
+							{% else %}
+								Комментариев
+							{% endif %}
+						</span>
+
+						<span>
+							👁 {{ article.views_count }}
+							   &nbsp;&nbsp;
+							{{ article.created_at|date:"H:i" }}
+						</span>
+
+					</div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="padding:20px;">
+            <p style="margin:0; color:#666;">Пока опубликованных статей нет.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

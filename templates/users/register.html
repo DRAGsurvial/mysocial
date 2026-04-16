@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Регистрация — MySocial{% endblock %}
+{% block content %}
+<section class="page">
+    <div class="card form-card">
+        <div class="eyebrow">Новый аккаунт</div>
+        <h1 class="section-title">Регистрация</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="primary-btn" type="submit">Создать аккаунт</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

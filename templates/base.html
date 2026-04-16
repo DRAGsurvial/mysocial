@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MySocial{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a class="brand" href="/">MySocial</a>
+            <nav class="nav">
+                <a href="/explore/">Поиск</a>
+                {% if user.is_authenticated %}
+                    <a href="/channels/create/">Создать канал</a>
+                    <a href="/profile/edit/">Профиль</a>
+                    <a href="/u/{{ user.profile.slug }}/">Моя страница</a>
+                    {% if user.is_staff %}
+                        <a href="/admin/">Админка</a>
+                    {% endif %}
+                    <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button class="ghost-btn" type="submit">Выйти</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Войти</a>
+                    <a class="primary-btn" href="{% url 'register' %}">Регистрация</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="container footer">
+        MySocial — стартовый MVP в духе Teletype.
+    </footer>
+</body>
+</html>
