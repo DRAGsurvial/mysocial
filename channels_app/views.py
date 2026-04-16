@@ -222,6 +222,24 @@ def add_comment_view(request, channel_slug, article_slug):
         'errors': form.errors,
     }, status=400)
     
+    
+@login_required
+def subscriptions_feed_view(request):
+    subscribed_channel_ids = request.user.channel_subscriptions.values_list('channel_id', flat=True)
+
+    articles = (
+        Article.objects
+        .filter(status='published', channel_id__in=subscribed_channel_ids)
+        .select_related('author', 'channel')
+        .prefetch_related('likes', 'views', 'comments')
+        .order_by('-created_at')
+    )
+
+    return render(request, 'channels/subscriptions_feed.html', {
+        'articles': articles
+    })
+
+
 @login_required
 @require_POST
 def toggle_subscription_view(request, slug):

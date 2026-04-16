@@ -10,6 +10,7 @@ from .views import (
     add_comment_view,
     toggle_subscription_view,
     notifications_view,
+    subscriptions_feed_view,
 )
 
 urlpatterns = [
@@ -23,4 +24,5 @@ urlpatterns = [
     path('c/<slug:channel_slug>/<slug:article_slug>/', article_detail_view, name='article_detail'),
     path('c/<slug:channel_slug>/<slug:article_slug>/like/', toggle_like_view, name='toggle_like'),
     path('c/<slug:channel_slug>/<slug:article_slug>/comment/', add_comment_view, name='add_comment'),
+    path('feed/', subscriptions_feed_view, name='subscriptions_feed'),
 ]

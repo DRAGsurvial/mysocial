@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Лента подписок</h1>
+
+{% for article in articles %}
+    <article class="card" style="padding:24px; margin-bottom:18px;">
+        <a href="{% url 'channel_detail' slug=article.channel.slug %}" style="text-decoration:none; color:#666;">
+            {{ article.channel.title }}
+        </a>
+
+        <h2>
+            <a href="{% url 'article_detail' channel_slug=article.channel.slug article_slug=article.slug %}">
+                {{ article.title }}
+            </a>
+        </h2>
+
+        <div style="display:flex; gap:14px; color:#777; font-size:14px;">
+            <span>👁 {{ article.views_count }}</span>
+            <span>❤️ {{ article.likes_count }}</span>
+            <span>💬 {{ article.comments_count }}</span>
+        </div>
+    </article>
+{% empty %}
+    <p>Ты пока ни на кого не подписан или в подписках ещё нет статей.</p>
+{% endfor %}
+{% endblock %}

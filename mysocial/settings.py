@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
     'channels_app.apps.ChannelsAppConfig',
+    'django_ckeditor_5',
 ]
 
 MIDDLEWARE = [
@@ -40,6 +41,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'channels_app.context_processors.notifications_context',
             ],
         },
     },
@@ -72,3 +74,25 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'toolbar': [
+            'heading', '|',
+            'bold', 'italic', 'underline', 'strikethrough', '|',
+            'link', 'blockQuote', 'insertTable', '|',
+            'bulletedList', 'numberedList', 'todoList', '|',
+            'imageUpload', 'mediaEmbed', '|',
+            'undo', 'redo'
+        ],
+        'height': 500,
+        'width': '100%',
+    },
+    'comment': {
+        'toolbar': ['bold', 'italic', 'link'],
+        'height': 120,
+        'width': '100%',
+    }
+}
+
+CKEDITOR_5_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'

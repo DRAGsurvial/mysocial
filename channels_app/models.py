@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.text import slugify
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class Channel(models.Model):
@@ -10,6 +11,8 @@ class Channel(models.Model):
     description = models.TextField(blank=True)
     avatar = models.ImageField(upload_to='channel_avatars/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    ads_enabled = models.BooleanField(default=False)
+    ads_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -37,11 +40,13 @@ class Article(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='articles')
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220)
-    content = models.TextField()
+    content = CKEditor5Field('Content', config_name='default')
     cover = models.ImageField(upload_to='article_covers/', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_advertisement = models.BooleanField(default=False)
+    advertisement_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     class Meta:
         unique_together = ('channel', 'slug')
